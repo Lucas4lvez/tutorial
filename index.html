@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Códigos PHP - CRUD de Aluno</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background: #f9f9f9; }
+        h2 { color: #333; border-bottom: 2px solid #ccc; padding-bottom: 4px; }
+        pre { background: #eee; padding: 15px; border-radius: 5px; overflow-x: auto; }
+        nav a { margin-right: 10px; }
+    </style>
+</head>
+<body>
+    <h1>Arquivos PHP do CRUD de Aluno</h1>
+    <nav>
+<a href="#cadAluno.php">cadAluno.php</a><a href="#consAluno.php">consAluno.php</a><a href="#altAluno.php">altAluno.php</a><a href="#excAluno.php">excAluno.php</a><a href="#listaAluno.php">listaAluno.php</a><a href="#scriptExpo">scriptExpo</a></nav><hr><h2 id="cadAluno.php">cadAluno.php</h2>
+<pre><?php
+$json = file_get_contents('php://input');
+$data = json_decode($json);
+
+$host = 'sql111.infinityfree.com';
+$dbname = 'if0_38543162_aluno';
+$username = 'if0_38543162';
+$password = 'dTkIr137dtb';
+
+$response = [];
+
+try {
+    $conn = new mysqli($host, $username, $password, $dbname);
+    mysqli_set_charset($conn, "utf8");
+
+    if ($conn->connect_error) {
+        throw new Exception("Connection failed: " . $conn->connect_error);
+    }
+
+    $sql = "INSERT INTO aluno (nomeCompleto, dataNascimento, matricula, serieAno, turma, endereco, telefoneResponsavel, emailResponsavel)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("ssssssss", $data->nomeCompleto, $data->dataNascimento, $data->matricula, $data->serieAno,
+                      $data->turma, $data->endereco, $data->telefoneResponsavel, $data->emailResponsavel);
+
+    if ($stmt->execute()) {
+        $response[] = ['msg' => "Cadastro realizado com sucesso!"];
+    } else {
+        throw new Exception("Erro ao cadastrar: " . $stmt->error);
+    }
+} catch (Exception $e) {
+    $response[] = ['msg' => "Erro: " . $e->getMessage()];
+} finally {
+    if (isset($conn)) {
+        $conn->close();
+    }
+}
+
+echo '{"informacoes":' . json_encode($response, JSON_UNESCAPED_UNICODE) . '}';
+?></pre>
+<hr>
+<h2 id="consAluno.php">consAluno.php</h2>
+<pre><?php
+$json = file_get_contents('php://input');
+$data = json_decode($json);
+
+$host = 'sql111.infinityfree.com';
+$dbname = 'if0_38543162_aluno';
+$username = 'if0_38543162';
+$password = 'dTkIr137dtb';
+
+$response = [];
+
+try {
+    $conn = new mysqli($host, $username, $password, $dbname);
+    mysqli_set_charset($conn, "utf8");
+
+    if ($conn->connect_error) {
+        throw new Exception("Falha na conexão: " . $conn->connect_error);
+    }
+
+    $sql = "SELECT * FROM aluno WHERE nomeCompleto LIKE ?";
+    $stmt = $conn->prepare($sql);
+    $nomeCompleto = $data->nomeCompleto . '%';
+    $stmt->bind_param("s", $nomeCompleto);
+    $stmt->execute();
+    $result = $stmt->get_result();
+
+    if ($result->num_rows > 0) {
+        while ($row = $result->fetch_assoc()) {
+            $response[] = $row;
+        }
+    } else {
+        $response[] = ['msg' => 'Nenhum aluno encontrado'];
+    }
+} catch (Exception $e) {
+    $response[] = ['msg' => "Erro: " . $e->getMessage()];
+} finally {
+    if (isset($conn)) {
+        $conn->close();
+    }
+}
+
+echo json_encode(['informacoes' => $response], JSON_UNESCAPED_UNICODE);
+?></pre>
+<hr>
+<h2 id="altAluno.php">altAluno.php</h2>
+<pre><?php
+$json = file_get_contents('php://input');
+$data = json_decode($json);
+
+$host = 'sql111.infinityfree.com';
+$dbname = 'if0_38543162_aluno';
+$username = 'if0_38543162';
+$password = 'dTkIr137dtb';
+
+$response = [];
+
+try {
+    $conn = new mysqli($host, $username, $password, $dbname);
+    mysqli_set_charset($conn, "utf8");
+
+    if ($conn->connect_error) {
+        throw new Exception("Connection failed: " . $conn->connect_error);
+    }
+
+    $sql = "UPDATE aluno SET 
+            nomeCompleto=?, dataNascimento=?, matricula=?, serieAno=?, turma=?, endereco=?, telefoneResponsavel=?, emailResponsavel=?
+            WHERE id=?";
+
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("ssssssssi", $data->nomeCompleto, $data->dataNascimento, $data->matricula,
+                      $data->serieAno, $data->turma, $data->endereco, $data->telefoneResponsavel,
+                      $data->emailResponsavel, $data->id);
+
+    if ($stmt->execute()) {
+        $response[] = ['msg' => "Informações alteradas com sucesso"];
+    } else {
+        throw new Exception("Erro ao alterar: " . $stmt->error);
+    }
+} catch (Exception $e) {
+    $response[] = ['msg' => "Erro: " . $e->getMessage()];
+} finally {
+    if (isset($conn)) {
+        $conn->close();
+    }
+}
+
+echo '{"informacoes":' . json_encode($response, JSON_UNESCAPED_UNICODE) . '}';
+?></pre>
+<hr>
+<h2 id="excAluno.php">excAluno.php</h2>
+<pre><?php
+$json = file_get_contents('php://input');
+$data = json_decode($json);
+
+$host = 'sql111.infinityfree.com';
+$dbname = 'if0_38543162_aluno';
+$username = 'if0_38543162';
+$password = 'dTkIr137dtb';
+
+$response = [];
+
+try {
+    $conn = new mysqli($host, $username, $password, $dbname);
+    mysqli_set_charset($conn, "utf8");
+
+    if ($conn->connect_error) {
+        throw new Exception("Erro de conexão: " . $conn->connect_error);
+    }
+
+    if (isset($data->id) && $data->id > 0) {
+        $sql = "DELETE FROM aluno WHERE id = ?";
+        $stmt = $conn->prepare($sql);
+
+        if (!$stmt) {
+            throw new Exception("Erro ao preparar a consulta de exclusão");
+        }
+
+        $stmt->bind_param('i', $data->id);
+        $stmt->execute();
+
+        if ($stmt->affected_rows > 0) {
+            $response[] = ['msg' => 'Aluno excluído com sucesso.'];
+        } else {
+            $response[] = ['msg' => 'Aluno não encontrado ou não foi possível excluir.'];
+        }
+    } else {
+        $response[] = ['msg' => 'ID inválido ou não fornecido.'];
+    }
+} catch (Exception $e) {
+    $response[] = ['msg' => "Erro: " . $e->getMessage()];
+} finally {
+    if (isset($conn)) {
+        $conn->close();
+    }
+}
+
+echo json_encode(['informacoes' => $response]);
+?></pre>
+<hr>
+<h2 id="listaAluno.php">listaAluno.php</h2>
+<pre><?php
+$host = 'sql111.infinityfree.com';
+$dbname = 'if0_38543162_aluno';
+$username = 'if0_38543162';
+$password = 'dTkIr137dtb';
+
+$conn = new mysqli($host, $username, $password, $dbname);
+mysqli_set_charset($conn, "utf8");
+
+if ($conn->connect_error) {
+    die("Connection failed: " . $conn->connect_error);
+}
+
+$sql = "SELECT * FROM aluno";
+$result = $conn->query($sql);
+$rows = [];
+
+if ($result->num_rows > 0) {
+    while($row = $result->fetch_assoc()) {
+        $rows[] = $row;
+    }
+} else {
+    $rows[] = ['msg' => 'Nenhum aluno encontrado.'];
+}
+
+$conn->close();
+echo json_encode(['alunos' => $rows], JSON_UNESCAPED_UNICODE);
+?></pre>
+<hr>
+</body></html>
